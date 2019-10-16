@@ -139,6 +139,8 @@
     </style>
 </head>
 <body>
+
+
     <span class="tiny-screen">We're gonna need a bigger screen. If you're on a mobile device, try turning it sideways.</span>
     <div id="app">
         <h1>Federal Agency Budget API (2018)</h1>
@@ -153,22 +155,22 @@
                 <option value="id3">Spending Sub-Categories</option>
             </select>
        
-            <template id="summary-app" v-if="summaryDisplay">
-                <!-- <div class="agency-info">
-                    <span class="description">Agency Name: </span>  {{ summary.data[0].agency_name }}
+            <template id="summary-app" v-if="summaryDisplay && summary">
+                <div class="agency-info">
+                    <span class="description">Agency Name: </span>  {{ summary.agency_name }}
                 </div>
                 <div class="agency-info">
-                    <span class="description">Agency ID: </span> {{ summary.data[0].agency_id }}
+                    <span class="description">Agency ID: </span> {{ summary.agency_id }}
                 </div>
                 <div class="number-response">
-                    <span class="description">Obligated Funds: </span>  {{ summary.data[0].obligated_amount | currencycommas }}
+                    <span class="description">Obligated Funds: </span>  {{ summary.obligated_amount | currencycommas }}
                 </div>
                 <div class="number-response">
-                        <span class="description">Outlay Amount: </span> {{ summary.data[0].outlay_amount | currencycommas }}
+                        <span class="description">Outlay Amount: </span> {{ summary.outlay_amount | currencycommas }}
                         </div>
                 <div class="number-response">
-                    <span class="description">Budget Amount: </span> {{ summary.data[0].budget_authority_amount | currencycommas }}
-                </div> -->
+                    <span class="description">Budget Amount: </span> {{ summary.budget_authority_amount | currencycommas }}
+                </div>
             </template>
                 
 
@@ -215,116 +217,124 @@
     
     <script>
 
-        const summarySelector = document.getElementById('id1');
-        const objectSelector = document.getElementById('id2');
-        const minorObjectSelector = document.getElementById('id3');
-        let selectBox = document.getElementById('select-box')
-        
-        
-        let summaryURL = `agency_summary/`
-        let majorURL = `object_class/`
-        let minorURL = `minor_object_class/`
-        const baseURL = `https://pure-citadel-29970.herokuapp.com/api/`
-        
-        let apiURL = `https://pure-citadel-29970.herokuapp.com/api/agency_summary`
-        let objectURL = `https://pure-citadel-29970.herokuapp.com/api/object_class`;
-        let minorObjectURL = `https://pure-citadel-29970.herokuapp.com/api/minor_object_class`;
-        
-
-        // Populates the dropdown list
-        let agenciesListUrl = "references/toptier_agencies/"
-        let allAgencyIds = []
-        let sourceURL = `https://api.usaspending.gov/api/v2/`
-        //
-
-        let year = 2017
-        let agencyRef = `references/agency/${this.currentId}/`
-        let majorobjectclasscode = 20
-
-
-        // grab all agency ids and pair them with agency names
-        axios.get(`${sourceURL}${agenciesListUrl}`)
-        .then(success => {
-            success.data.results.map(el => {
-                return allAgencyIds.push({"id": el.agency_id, "name": el.agency_name})
+            const summarySelector = document.getElementById('id1');
+            const objectSelector = document.getElementById('id2');
+            const minorObjectSelector = document.getElementById('id3');
+            let selectBox = document.getElementById('select-box')
+            
+            
+            let summaryURL = `agency_summary/`
+            let majorURL = `object_class/`
+            let minorURL = `minor_object_class/`
+            const baseURL = `https://pure-citadel-29970.herokuapp.com/api/`
+            
+            let apiURL = `https://pure-citadel-29970.herokuapp.com/api/agency_summary`
+            let objectURL = `https://pure-citadel-29970.herokuapp.com/api/object_class`;
+            let minorObjectURL = `https://pure-citadel-29970.herokuapp.com/api/minor_object_class`;
+            
+    
+            // Populates the dropdown list
+            let agenciesListUrl = "references/toptier_agencies/"
+            let allAgencyIds = []
+            let sourceURL = `https://api.usaspending.gov/api/v2/`
+            //
+    
+            let year = 2017
+            let agencyRef = `references/agency/${this.currentId}/`
+            let majorobjectclasscode = 20
+    
+    
+            // grab all agency ids and pair them with agency names
+            axios.get(`${sourceURL}${agenciesListUrl}`)
+            .then(success => {
+                success.data.results.map(el => {
+                    return allAgencyIds.push({"id": el.agency_id, "name": el.agency_name})
+                })
             })
-        })
-
-        // Begin Vue.js
-        new Vue({
-            el: '#app',
-            data () {
-                return {
-                    allIds: allAgencyIds,
-                    currentId: 1146,
-                    summary: null,
-                    summaryDisplay: true,
-                    majorObjectDisplay: false,
-                    minorObjectDisplay: false,
-                }
-            },    
-            methods: {
-                callNewAgency: function(opt) {
-                    this.currentId = opt.target.value
-                    axios.get(`${sourceURL}references/agency/${this.currentId}/`)
+            .then(() => {
+                axios.get(`${sourceURL}references/agency/${1146}/`)
                     .then(success => {
                         let collectedData = success.data.results
                         this.summary = collectedData
                         console.log(this.summary)
                     })
-                    .then(() => {
-                        let majorclassurl = `financial_spending/major_object_class/?fiscal_year=${year}&funding_agency_id=${this.currentId}`
-                        axios.get(`${sourceURL}${majorclassurl}`)
-                        .then(success => {
-                            let collectedData = success.data.results
-                            this.summaryObj = collectedData
-                            console.log(this.summaryObj)
-                        })
-                    })
-                    .then(() => {
-                        let minorclassurl = `financial_spending/object_class/?fiscal_year=${year}&funding_agency_id=${this.currentId}&major_object_class_code=${majorobjectclasscode}`
-                        axios.get(`${sourceURL}${minorclassurl}`)
-                        .then(success => {
-                            let collectedData = success.data.results
-                            this.summaryMinorObj = collectedData
-                            console.log(this.summaryMinorObj)
-                        })
-                    })
-                    .catch(err => {
-                        console.error(err)
-                        console.error('there was probably an issue with the rate limit, try again in 10 seconds or check the error messages above.')
-                    })
-                },
-                optionStateChange: function (opt){
-                    if(opt.target.value === 'id1') {
-                        this.summaryDisplay = true;
-                        this.majorObjectDisplay = false;
-                        this.minorObjectDisplay = false;
-                    } else if (opt.target.value === 'id2') {
-                        this.summaryDisplay = false;
-                        this.majorObjectDisplay = true;
-                        this.minorObjectDisplay = false;
-                    } else if (opt.target.value === 'id3') {
-                        this.summaryDisplay = false;
-                        this.majorObjectDisplay = false;
-                        this.minorObjectDisplay = true;
+            })
+    
+            // Begin Vue.js
+            new Vue({
+                el: '#app',
+                data () {
+                    return {
+                        allIds: allAgencyIds,
+                        currentId: 1146,
+                        summary: null,
+                        summaryDisplay: true,
+                        majorObjectDisplay: false,
+                        minorObjectDisplay: false,
                     }
+                },    
+                methods: {
+                    callNewAgency: function(opt) {
+                        this.currentId = opt.target.value
+                        axios.get(`${sourceURL}references/agency/${this.currentId}/`)
+                        .then(success => {
+                            let collectedData = success.data.results
+                            this.summary = collectedData
+                            console.log(this.summary)
+                        })
+                        .then(() => {
+                            let majorclassurl = `financial_spending/major_object_class/?fiscal_year=${year}&funding_agency_id=${this.currentId}`
+                            axios.get(`${sourceURL}${majorclassurl}`)
+                            .then(success => {
+                                let collectedData = success.data.results
+                                this.summaryObj = collectedData
+                                console.log(this.summaryObj)
+                            })
+                        })
+                        .then(() => {
+                            let minorclassurl = `financial_spending/object_class/?fiscal_year=${year}&funding_agency_id=${this.currentId}&major_object_class_code=${majorobjectclasscode}`
+                            axios.get(`${sourceURL}${minorclassurl}`)
+                            .then(success => {
+                                let collectedData = success.data.results
+                                this.summaryMinorObj = collectedData
+                                console.log(this.summaryMinorObj)
+                            })
+                        })
+                        .catch(err => {
+                            console.error(err)
+                            console.error('there was probably an issue with the rate limit, try again in 10 seconds or check the error messages above.')
+                        })
+                    },
+                    optionStateChange: function (opt){
+                        if(opt.target.value === 'id1') {
+                            this.summaryDisplay = true;
+                            this.majorObjectDisplay = false;
+                            this.minorObjectDisplay = false;
+                        } else if (opt.target.value === 'id2') {
+                            this.summaryDisplay = false;
+                            this.majorObjectDisplay = true;
+                            this.minorObjectDisplay = false;
+                        } else if (opt.target.value === 'id3') {
+                            this.summaryDisplay = false;
+                            this.majorObjectDisplay = false;
+                            this.minorObjectDisplay = true;
+                        }
+                    },
                 },
-            },
-            mounted () {
-                
-
-            },
-            filters: {
-                currencycommas (value) {
-                    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value)
+                mounted () {
+                    
+    
+                },
+                filters: {
+                    currencycommas (value) {
+                        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value)
+                    }
                 }
-            }
-        })
-        // End Vue.js
-
-
-    </script>
+            })
+            // End Vue.js
+    
+    
+        </script>
     
 
   
