@@ -56,7 +56,7 @@
     }
 
     div {
-        margin-bottom: 2%;
+        margin-bottom: 4%;
     }
 
     .number-response {
@@ -76,7 +76,7 @@
     }
 
     .agency-info {
-        color: gray;
+        color: rgb(241, 235, 224);
         font-family: Verdana, Tahoma, sans-serif;
         letter-spacing: .2rem;
         text-shadow: black 1px 1px 1px;
@@ -102,7 +102,8 @@
     }
 
     #select-agency-id {
-        width: 100%;
+        width: auto;
+        display: block;
     }
 
     #submit-button {
@@ -143,19 +144,16 @@
 
     <span class="tiny-screen">We're gonna need a bigger screen. If you're on a mobile device, try turning it sideways.</span>
     <div id="app">
-        <h1>Federal Agency Budget API (2018)</h1>
+        <h1>Federal Agency Budget API ({{this.year}})</h1>
 
         <section class="agency-viewer">
             <select v-on:change="callNewAgency" name="agency-id" id="select-agency-id">
+                    <option>Select from the following Federal Agencies...</option>
                 <option v-for="agency in allIds" :value="agency.id">{{agency.name}}</option>
             </select>
-            <select v-on:change="optionStateChange" name="agency-id" id="select-box">
-                <option value="id1">Summary</option>
-                <option value="id2">Spending Categories</option>
-                <option value="id3">Spending Sub-Categories</option>
-            </select>
+           
        
-            <template id="summary-app" v-if="summaryDisplay && summary">
+            <template id="summary-app" v-if="summary">
                 <div class="agency-info">
                     <span class="description">Agency Name: </span>  {{ summary.agency_name }}
                 </div>
@@ -174,26 +172,31 @@
             </template>
                 
             <!-- Need to add onChange listeners to activate api calls and dynamic generation for major and minor class lists after selecting the preceding element.  -->
-        
-            <template id="major-object-app" v-else-if="majorObjectDisplay">
+         <select v-on:change="callNewMajorObj" name="agency-id" id="select-agency-id">
+                    <option>Select from the following Major Spending Classes...</option>
+                <option v-for="majobjclass in summaryObj" v-if="summaryObj !== null" :value="majobjclass.major_object_class_name">{{majobjclass.major_object_class_name}}</option>
+                <!-- <option value="id2">Spending Categories</option> -->
+                <!-- <option value="id3">Spending Sub-Categories</option> -->
+        </select>
+            <template id="major-object-app" v-if="summary && currentSummaryObj">
                 <!-- <div class="agency-info">
-                    <span class="description">Agency Name: </span>  {{ summary.data[0].agency_name }}
+                    <span class="description">Agency Name: </span>  {{ summary.agency_name }}
                 </div>
                 <div class="agency-info">
-                    <span class="description">Agency ID: </span> {{ summary.data[0].agency_id }}
-                </div>
-                <div class="number-response">
-                    <span class="description">Major Object Class Code: </span>  {{ summaryObj.data[0].major_object_class_code }}
-                </div>
-                <div class="number-response">
-                        <span class="description">Major Object Class Name: </span> {{ summaryObj.data[0].major_object_class_name }}
-                </div>
-                <div class="number-response">
-                    <span class="description">Obligated Amount: </span> {{ summaryObj.data[0].obligated_amount | currencycommas }}
+                    <span class="description">Agency ID: </span> {{ summary.agency_id }}
                 </div> -->
+                <div class="number-response">
+                    <span class="description">Major Object Class Code: </span>  {{ currentSummaryObj.major_object_class_code }}
+                </div>
+                <!-- <div class="number-response">
+                        <span class="description">Major Object Class Name: </span> {{ currentSummaryObj.major_object_class_name }}
+                </div> -->
+                <div class="number-response">
+                    <span class="description">Obligated Amount: </span> {{ currentSummaryObj.obligated_amount | currencycommas }}
+                </div>
             </template>    
 
-            <template id="minor-object-app" v-else-if="minorObjectDisplay">
+            <template id="minor-object-app" v-else-if="">
                     <!-- <div class="agency-info">
                         <span class="description">Agency Name: </span>  {{ summary.data[0].agency_name }}
                     </div>
@@ -239,7 +242,7 @@
             let sourceURL = `https://api.usaspending.gov/api/v2/`
             //
     
-            let year = 2017
+            // let year = 2017
             let agencyRef = `references/agency/${this.currentId}/`
             let majorobjectclasscode = 20
     
@@ -251,14 +254,14 @@
                     return allAgencyIds.push({"id": el.agency_id, "name": el.agency_name})
                 })
             })
-            .then(() => {
-                axios.get(`${sourceURL}references/agency/${1146}/`)
-                    .then(success => {
-                        let collectedData = success.data.results
-                        this.summary = collectedData
-                        console.log(this.summary)
-                    })
-            })
+            // .then(() => {
+            //     axios.get(`${sourceURL}references/agency/${1146}/`)
+            //         .then(success => {
+            //             let collectedData = success.data.results
+            //             this.summary = collectedData
+            //             console.log(this.summary)
+            //         })
+            // })
     
             // Begin Vue.js
             new Vue({
@@ -267,10 +270,13 @@
                     return {
                         allIds: allAgencyIds,
                         currentId: 1146,
+                        year: 2017,
                         summary: null,
-                        summaryDisplay: true,
-                        majorObjectDisplay: false,
-                        minorObjectDisplay: false,
+                        summaryObj: null,
+                        currentSummaryObj: null,
+                        // summaryDisplay: true,
+                        // majorObjectDisplay: false,
+                        // minorObjectDisplay: false,
                     }
                 },    
                 methods: {
@@ -280,10 +286,11 @@
                         .then(success => {
                             let collectedData = success.data.results
                             this.summary = collectedData
+                            this.year = Number(collectedData.active_fy)
                             console.log(this.summary)
                         })
                         .then(() => {
-                            let majorclassurl = `financial_spending/major_object_class/?fiscal_year=${year}&funding_agency_id=${this.currentId}`
+                            let majorclassurl = `financial_spending/major_object_class/?fiscal_year=${this.year}&funding_agency_id=${this.currentId}`
                             axios.get(`${sourceURL}${majorclassurl}`)
                             .then(success => {
                                 let collectedData = success.data.results
@@ -292,7 +299,7 @@
                             })
                         })
                         .then(() => {
-                            let minorclassurl = `financial_spending/object_class/?fiscal_year=${year}&funding_agency_id=${this.currentId}&major_object_class_code=${majorobjectclasscode}`
+                            let minorclassurl = `financial_spending/object_class/?fiscal_year=${this.year}&funding_agency_id=${this.currentId}&major_object_class_code=${majorobjectclasscode}`
                             axios.get(`${sourceURL}${minorclassurl}`)
                             .then(success => {
                                 let collectedData = success.data.results
@@ -305,21 +312,27 @@
                             console.error('there was probably an issue with the rate limit, try again in 10 seconds or check the error messages above.')
                         })
                     },
-                    optionStateChange: function (opt){
-                        if(opt.target.value === 'id1') {
-                            this.summaryDisplay = true;
-                            this.majorObjectDisplay = false;
-                            this.minorObjectDisplay = false;
-                        } else if (opt.target.value === 'id2') {
-                            this.summaryDisplay = false;
-                            this.majorObjectDisplay = true;
-                            this.minorObjectDisplay = false;
-                        } else if (opt.target.value === 'id3') {
-                            this.summaryDisplay = false;
-                            this.majorObjectDisplay = false;
-                            this.minorObjectDisplay = true;
-                        }
+                    callNewMajorObj: function(opt) {
+                        let nameSelected = opt.target.value
+                        let resultReduction = this.summaryObj.filter(each => each.major_object_class_name === nameSelected)
+                        this.currentSummaryObj = resultReduction[0]
+                        console.log(this.currentSummaryObj)
                     },
+                    // optionStateChange: function (opt){
+                    //     if(opt.target.value === 'id1') {
+                    //         this.summaryDisplay = true;
+                    //         this.majorObjectDisplay = false;
+                    //         this.minorObjectDisplay = false;
+                    //     } else if (opt.target.value === 'id2') {
+                    //         this.summaryDisplay = false;
+                    //         this.majorObjectDisplay = true;
+                    //         this.minorObjectDisplay = false;
+                    //     } else if (opt.target.value === 'id3') {
+                    //         this.summaryDisplay = false;
+                    //         this.majorObjectDisplay = false;
+                    //         this.minorObjectDisplay = true;
+                    //     }
+                    // },
                 },
                 mounted () {
                     
