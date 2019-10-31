@@ -173,7 +173,7 @@
                 </div>
             </template>
                 
-
+            <!-- Need to add onChange listeners to activate api calls and dynamic generation for major and minor class lists after selecting the preceding element.  -->
         
             <template id="major-object-app" v-else-if="majorObjectDisplay">
                 <!-- <div class="agency-info">
@@ -328,7 +328,7 @@
                 filters: {
                     currencycommas (value) {
                         return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value)
-                    }
+                    },
                 }
             })
             // End Vue.js
