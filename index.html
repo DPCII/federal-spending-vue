@@ -9,7 +9,6 @@
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
     <!-- Importing Axios -->
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script> -->
 
     <title>Federal Agency Budget API</title>
     <style>
@@ -226,26 +225,12 @@
             const minorObjectSelector = document.getElementById('id3');
             let selectBox = document.getElementById('select-box')
             
-            
-            let summaryURL = `agency_summary/`
-            let majorURL = `object_class/`
-            let minorURL = `minor_object_class/`
-            const baseURL = `https://pure-citadel-29970.herokuapp.com/api/`
-            
-            let apiURL = `https://pure-citadel-29970.herokuapp.com/api/agency_summary`
-            let objectURL = `https://pure-citadel-29970.herokuapp.com/api/object_class`;
-            let minorObjectURL = `https://pure-citadel-29970.herokuapp.com/api/minor_object_class`;
-            
     
             // Populates the dropdown list
             let agenciesListUrl = "references/toptier_agencies/"
             let allAgencyIds = []
             let sourceURL = `https://api.usaspending.gov/api/v2/`
             //
-    
-            // let year = 2017
-            let agencyRef = `references/agency/${this.currentId}/`
-            let majorobjectclasscode = 20
     
     
             // grab all agency ids and pair them with agency names
