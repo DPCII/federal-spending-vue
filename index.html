@@ -173,7 +173,6 @@
                 </div>
             </template>
                 
-            <!-- Need to add onChange listeners to activate api calls and dynamic generation for major and minor class lists after selecting the preceding element.  -->
          <select v-on:change="callNewMajorObj" name="agency-id" id="select-agency-id">
                     <option>Select from the following Major Spending Classes...</option>
                 <option v-for="majobjclass in summaryObj" v-if="summaryObj !== null" :value="majobjclass.major_object_class_name">{{majobjclass.major_object_class_name}}</option>
@@ -256,14 +255,6 @@
                     return allAgencyIds.push({"id": el.agency_id, "name": el.agency_name})
                 })
             })
-            // .then(() => {
-            //     axios.get(`${sourceURL}references/agency/${1146}/`)
-            //         .then(success => {
-            //             let collectedData = success.data.results
-            //             this.summary = collectedData
-            //             console.log(this.summary)
-            //         })
-            // })
     
             // Begin Vue.js
             new Vue({
@@ -276,9 +267,6 @@
                         summary: null,
                         summaryObj: null,
                         currentSummaryObj: null,
-                        // summaryDisplay: true,
-                        // majorObjectDisplay: false,
-                        // minorObjectDisplay: false,
                     }
                 },    
                 methods: {
@@ -320,21 +308,7 @@
                         this.currentSummaryObj = resultReduction[0]
                         console.log(this.currentSummaryObj)
                     },
-                    // optionStateChange: function (opt){
-                    //     if(opt.target.value === 'id1') {
-                    //         this.summaryDisplay = true;
-                    //         this.majorObjectDisplay = false;
-                    //         this.minorObjectDisplay = false;
-                    //     } else if (opt.target.value === 'id2') {
-                    //         this.summaryDisplay = false;
-                    //         this.majorObjectDisplay = true;
-                    //         this.minorObjectDisplay = false;
-                    //     } else if (opt.target.value === 'id3') {
-                    //         this.summaryDisplay = false;
-                    //         this.majorObjectDisplay = false;
-                    //         this.minorObjectDisplay = true;
-                    //     }
-                    // },
+
                 },
                 mounted () {
                     
